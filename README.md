@@ -1,2 +1,3 @@
-# ISP-2022-053505
-# Измер Юрий Геннадьевич
+# Измер Юрий Геннадьевич 053505
+#### Lab 1
+on docker hub: https://hub.docker.com/repository/docker/yuraiz/isp-task-1
