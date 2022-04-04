@@ -1,41 +1,40 @@
 #!/usr/bin/python
 
 # TODO:
-# [+] serialize functions
-# [ ] serialize objects
-# [ ] serialize objects with functions
-# [ ] serialize classes
+# [+] core
+# [+] json
+# [+] xml
+# [+] yaml
+# [ ] toml
+# [ ] tests
 
-
-import json
-
-from matplotlib.font_manager import json_load
-
-from serializer_core import deserialize
-
-from json_serializer import JsonSerializer
-
-
-def mul(a, b):
-    return a * b
-
-
-test_tuple = (1, 'hello')
+from types import NoneType
+from serializers.fabric import *
 
 
 class Person:
+    def __init__(self, name='test', age=32) -> None:
+        self.name = name
+        self.age = age
+
     name: str
     age: int
 
-    def get_age():
-        return 6
+    def get_age(self):
+        return self.age
 
-    def greet():
+    def greet(self):
         print('Hello')
 
 
-jserializer = JsonSerializer()
+def some_thing(fabric: SerializerFabric):
+    serializer = fabric.createSerializer()
+    person = Person('tyler', 21)
+    s = serializer.dumps(person)
+    res = serializer.loads(s)
+    res.greet()
 
-s = jserializer.dumps(Person)
-print(jserializer.try_to_load(s))
-multip = deserialize(json.loads(s))
+
+some_thing(XmlSerializerFabric)
+some_thing(JsonSerializerFabric)
+some_thing(YamlSerializerFabric)
