@@ -1,10 +1,13 @@
+"""Serialize objects, classes and functions to yaml."""
 import serializers.serializer_core as core
 from serializers.serializer import Serializer
 
 
 class YamlSerializer(Serializer):
+    """Yaml serializer."""
 
     def dumps(self, item):
+        """Serialize object, class or function to yaml."""
         def to_str(item, depth=0):
             if isinstance(item, dict):
                 strings = list()
@@ -31,6 +34,7 @@ class YamlSerializer(Serializer):
         return to_str(core.serialize(item))
 
     def loads(self, string):
+        """Deserialize object, class or function from yaml."""
         def get_sval(key: str, sval: str) -> any:
             res = sval
 

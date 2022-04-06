@@ -1,10 +1,13 @@
+"""Serialize objects, classes and functions to yaml."""
 import serializers.serializer_core as core
 from serializers.serializer import Serializer
 
 
 class XmlSerializer(Serializer):
+    """Xml serializer."""
 
     def dumps(self, item):
+        """Serialize object, class or function to xml."""
         def to_str(item):
             if isinstance(item, dict):
                 strings = list()
@@ -19,6 +22,7 @@ class XmlSerializer(Serializer):
         return to_str(core.serialize(item))
 
     def loads(self, string):
+        """Deserialize object, class or function from xml."""
         def iter(string: str) -> tuple[str, any, str | None]:
             key = string.partition('>')[0][1:]
             if '<' in key:

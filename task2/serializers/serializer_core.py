@@ -1,7 +1,10 @@
+"""Core of serializer."""
 import types
 
 
 def serialize(item) -> any:
+    """Serialize item to `dict[str, Any]`."""
+
     def serialize_elements(item) -> dict[str, any]:
         """Serialize elements of iterable type."""
         elements = dict()
@@ -10,7 +13,7 @@ def serialize(item) -> any:
         return elements
 
     def serialize_pub_attribs(item) -> dict[str, any]:
-        """Dict with public attributes of item."""
+        """Serialize public attributes of item."""
         elements = dict()
         pub_attributes = list(
             filter(lambda item: not item.startswith('_'), dir(item)))
@@ -64,6 +67,7 @@ def serialize(item) -> any:
 
 
 def deserialize(item: dict[str, any]):
+    """Deserialize item from `dict[str, Any]`."""
     if not isinstance(item, dict):
         return item
 
@@ -88,16 +92,16 @@ def deserialize(item: dict[str, any]):
             obj_type = getattr(__main__, value['name'], None)
             serialized = serialize(obj_type)
 
-            if isinstance(serialized, dict) and serialized['type'] != value:
-                attribs = value['attribs']
-                for key in attribs.keys():
-                    attribs[key] = deserialize(attribs[key])
+            # if isinstance(serialized, dict) and serialized['type'] != value:
+            attribs = value['attribs']
+            for key in attribs.keys():
+                attribs[key] = deserialize(attribs[key])
 
-                obj_type = type(
-                    value['name'],
-                    (object, ),
-                    attribs
-                )
+            obj_type = type(
+                value['name'],
+                (object, ),
+                attribs
+            )
 
             return obj_type
 
