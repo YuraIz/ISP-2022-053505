@@ -1,4 +1,5 @@
 """Core of serializer."""
+from operator import mod
 import types
 
 
@@ -21,7 +22,7 @@ def serialize(item) -> any:
             elements[attr] = serialize(item.__getattribute__(attr))
         return elements
 
-    if isinstance(item, int | str):
+    if isinstance(item, int | str | types.NoneType):
         return item
     elif isinstance(item, tuple):
         return {"tuple": serialize_elements(item)}
@@ -51,6 +52,7 @@ def serialize(item) -> any:
 
     from inspect import getmodule
     import sys
+
     # if (getmodule(type(item)).__name__ in sys.builtin_module_names):
     if (getmodule(type(item)).__name__ in sys.builtin_module_names):
         # print('Hi')
@@ -92,24 +94,37 @@ def deserialize(item: dict[str, any]):
             obj_type = getattr(__main__, value['name'], None)
             serialized = serialize(obj_type)
 
-            # if isinstance(serialized, dict) and serialized['type'] != value:
-            attribs = value['attribs']
-            for key in attribs.keys():
-                attribs[key] = deserialize(attribs[key])
+            if(serialized is None
+               or isinstance(serialized, dict)
+               and serialized['type'] != value):
+                attribs = value['attribs']
+                for key in attribs.keys():
+                    attribs[key] = deserialize(attribs[key])
 
-            obj_type = type(
-                value['name'],
-                (object, ),
-                attribs
-            )
+                obj_type = type(
+                    value['name'],
+                    (object, ),
+                    attribs
+                )
 
             return obj_type
 
         elif(key == 'func'):
-            import __main__
-            globals().update(__main__.__dict__)
+            import importlib
+            import builtins
+
+            f_code = deserialize(value)
+            f_names = f_code.co_names
+
+            for name in f_names:
+                if builtins.__dict__.get(name, 42) == 42:
+                    try:
+                        builtins.__dict__[name] = importlib.import_module(name)
+                    except Exception:
+                        builtins.__dict__[name] = 42
+
             def func(): pass
-            func.__code__ = deserialize(value)
+            func.__code__ = f_code
             return func
 
         elif(key == 'code'):

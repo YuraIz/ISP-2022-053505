@@ -10,20 +10,20 @@ class JsonSerializer(Serializer):
         """Serialize object, class or function to json."""
         def to_str(item):
             if isinstance(item, dict):
-                strings = list()
+                strings = []
                 for key, value in item.items():
                     strings.append(f'{to_str(key)}:{to_str(value)},')
                 return f"{{{''.join(strings)[:-1]}}}"
-            elif isinstance(item, str):
-                s = item.translate(str.maketrans({
+            if isinstance(item, str):
+                string = item.translate(str.maketrans({
                     "\"":  r"\"",
                     "\\": r"\\",
                 }))
-                return f"\"{s}\""
-            elif item is None:
+                return f"\"{string}\""
+            if item is None:
                 return 'null'
-            else:
-                return str(item)
+
+            return str(item)
 
         return to_str(core.serialize(item))
 

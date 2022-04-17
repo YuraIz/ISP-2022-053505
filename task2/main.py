@@ -10,7 +10,12 @@
 # [ ] toml
 # [ ] tests
 
-from serializers.fabric import *
+from serializers.fabric import (SerializerFabric, XmlSerializerFabric,
+                                JsonSerializerFabric, YamlSerializerFabric)
+
+import serializers.serializer_core as core
+
+globals().update(core.__dict__)
 
 
 class Person:
@@ -30,16 +35,18 @@ class Person:
 
     def greet(self):
         """Say hello."""
-        print('Hello')
+        print(f'Hello, my name is {self.name}')
 
 
 def some_thing(fabric: SerializerFabric):
     """Serialize and deserialize example object."""
-    serializer = fabric.createSerializer()
+    serializer = fabric.create_serializer()
     person = Person('tyler', 21)
-    s = serializer.dumps(person)
-    res = serializer.loads(s)
+    string = serializer.dumps(person)
+    res = serializer.loads(string)
     res.greet()
+
+    print(isinstance(res, Person))
 
 
 some_thing(XmlSerializerFabric)

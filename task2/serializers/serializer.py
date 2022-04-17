@@ -1,23 +1,29 @@
 """Abstract serializer."""
 
 
+from abc import abstractmethod
+
+
 class Serializer:
     """Abstract serializer."""
 
+    @abstractmethod
     def dumps(self, item: any) -> str:
         """Serialize object, class or function."""
-        pass
+        return
 
+    @abstractmethod
     def loads(self, string: str) -> any:
         """Deserialize object, class or function."""
-        pass
+        return
 
     def dump(self, item: any, filename: str):
         """Serialize object, class or function and write to file."""
-        f = open(filename, 'w')
-        f.write(self.dumps(item))
+        with open(filename, 'w', encoding='utf8') as file:
+            file.write(self.dumps(item))
 
     def load(self, filename: str):
         """Read from file and deserialize object, class or function."""
-        f = open(filename, 'r')
-        return self.loads(f.read())
+        with open(filename, 'r', encoding='utf8') as file:
+            string = file.read()
+        return self.loads(string)

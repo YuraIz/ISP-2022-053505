@@ -4,7 +4,7 @@ from serializers.fabric import *
 
 def some_thing(fabric: SerializerFabric):
     item = ('test', 'another', {'key': 'val'}, None)
-    serializer = fabric.createSerializer()
+    serializer = fabric.create_serializer()
     s = serializer.dumps(item)
     res = serializer.loads(s)
     serializer.dump(res, 'testfile')
