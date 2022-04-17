@@ -1,4 +1,4 @@
-"""Module to check serializer."""
+"""Module to check."""
 import math
 c = 42
 

@@ -83,8 +83,8 @@ def loadfiles(files_to_load):
         except FileNotFoundError:
             print(f'Error when loading {filename}: No such file')
 
-        code.interact(local=locals(),
-                      banner='Starting interactive prompt', exitmsg='')
+    code.interact(local=locals(),
+                  banner='Starting interactive prompt', exitmsg='')
 
 
 def convertfiles(files_to_convert: list[str]) -> None:

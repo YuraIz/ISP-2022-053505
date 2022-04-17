@@ -10,13 +10,12 @@ class SerializerFabric:
     @abstractmethod
     def create_serializer() -> serializers.Serializer:
         """Create serializer."""
-        return None
 
-    @staticmethod
-    def check():
+    @classmethod
+    def check(cls):
         """Use serializer."""
-        ser = SerializerFabric.create_serializer()
-        string = ser.dumps(SerializerFabric)
+        ser = cls.create_serializer()
+        string = ser.dumps(cls)
         ser.loads(string)
 
 

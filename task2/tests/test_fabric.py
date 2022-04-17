@@ -17,3 +17,9 @@ def test_thing():
     some_thing(JsonSerializerFabric)
     some_thing(YamlSerializerFabric)
     remove('testfile')
+
+
+def test_check():
+    XmlSerializerFabric.check()
+    JsonSerializerFabric.check()
+    YamlSerializerFabric.check()

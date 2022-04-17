@@ -1,6 +1,10 @@
 """Core of serializer."""
-from operator import mod
 import types
+from inspect import getmodule
+import sys
+import importlib
+import builtins
+import __main__
 
 
 def serialize(item) -> any:
@@ -8,14 +12,14 @@ def serialize(item) -> any:
 
     def serialize_elements(item) -> dict[str, any]:
         """Serialize elements of iterable type."""
-        elements = dict()
-        for i in range(len(item)):
-            elements[f"el{i}"] = serialize(item[i])
+        elements = {}
+        for i, element in enumerate(item):
+            elements[f"el{i}"] = serialize(element)
         return elements
 
     def serialize_pub_attribs(item) -> dict[str, any]:
         """Serialize public attributes of item."""
-        elements = dict()
+        elements = {}
         pub_attributes = list(
             filter(lambda item: not item.startswith('_'), dir(item)))
         for attr in pub_attributes:
@@ -24,71 +28,62 @@ def serialize(item) -> any:
 
     if isinstance(item, int | str | types.NoneType):
         return item
-    elif isinstance(item, tuple):
+    if isinstance(item, tuple):
         return {"tuple": serialize_elements(item)}
-    elif isinstance(item, list):
+    if isinstance(item, list):
         return {"list": serialize_elements(item)}
-    elif isinstance(item, dict):
+    if isinstance(item, dict):
         return {"dict": item}
-    elif isinstance(item, bytes):
+    if isinstance(item, bytes):
         return {"bytes": item.hex()}
-    elif isinstance(item, types.MappingProxyType):
+    if isinstance(item, types.MappingProxyType):
         item_dict = dict(item)
         for key in item_dict.keys():
             item_dict[key] = serialize(item_dict[key])
         print("hello")
         return item_dict
 
-    elif isinstance(item, types.CodeType):
+    if isinstance(item, types.CodeType):
         return {"code": serialize_pub_attribs(item)}
-    elif isinstance(item, types.FunctionType):
+    if isinstance(item, types.FunctionType):
         return {"func": serialize(item.__code__)}
-    elif isinstance(item, type):
+    if isinstance(item, type):
         attribs_dict = dict(item.__dict__)
         for key in attribs_dict.keys():
             attribs_dict[key] = serialize(attribs_dict[key])
         attribs_dict['__annotations__'] = None
         return {"type": {"name": item.__name__, "attribs": attribs_dict}}
 
-    from inspect import getmodule
-    import sys
-
-    # if (getmodule(type(item)).__name__ in sys.builtin_module_names):
-    if (getmodule(type(item)).__name__ in sys.builtin_module_names):
-        # print('Hi')
-        return None
-    if (getmodule(type(item)).__name__ == 'importlib._bootstrap'):
-        return None
-    if (getmodule(type(item)).__name__ == '_sitebuiltins'):
+    if (getmodule(type(item)).__name__ in sys.builtin_module_names or
+        getmodule(type(item)).__name__ == 'importlib._bootstrap' or
+            getmodule(type(item)).__name__ == '_sitebuiltins'):
         return None
 
-    else:
-        obj_dict = serialize(item.__dict__)
-        obj_type = serialize(type(item))
-        return {"object": {"obj_type": obj_type, "obj_dict": obj_dict}}
+    obj_dict = serialize(item.__dict__)
+    obj_type = serialize(type(item))
+    return {"object": {"obj_type": obj_type, "obj_dict": obj_dict}}
 
 
-def deserialize(item: dict[str, any]):
+def deserialize(item: dict[str, any]) -> any:
     """Deserialize item from `dict[str, Any]`."""
     if not isinstance(item, dict):
         return item
 
     for (key, value) in item.items():
-        if(key == 'tuple'):
+        if key == 'tuple':
             if value is None:
                 return ()
-            return tuple([deserialize(element) for element in value.values()])
-        elif(key == 'list'):
+            return tuple(deserialize(element) for element in value.values())
+        if key == 'list':
             return [deserialize(element) for element in value.values()]
-        elif(key == 'dict'):
+        if key == 'dict':
             return value
-        elif(key == 'bytes'):
+        if key == 'bytes':
             return bytes.fromhex(value)
-        elif(isinstance(value, int | float | str)):
+        if isinstance(value, int | float | str):
             return value
 
-        elif(key == 'type'):
-            import __main__
+        if key == 'type':
             globals().update(__main__.__dict__)
 
             obj_type = getattr(__main__, value['name'], None)
@@ -98,8 +93,8 @@ def deserialize(item: dict[str, any]):
                or isinstance(serialized, dict)
                and serialized['type'] != value):
                 attribs = value['attribs']
-                for key in attribs.keys():
-                    attribs[key] = deserialize(attribs[key])
+                for i in attribs.keys():
+                    attribs[i] = deserialize(attribs[i])
 
                 obj_type = type(
                     value['name'],
@@ -109,9 +104,7 @@ def deserialize(item: dict[str, any]):
 
             return obj_type
 
-        elif(key == 'func'):
-            import importlib
-            import builtins
+        if key == 'func':
 
             f_code = deserialize(value)
             f_names = f_code.co_names
@@ -120,14 +113,15 @@ def deserialize(item: dict[str, any]):
                 if builtins.__dict__.get(name, 42) == 42:
                     try:
                         builtins.__dict__[name] = importlib.import_module(name)
-                    except Exception:
+                    except ModuleNotFoundError:
                         builtins.__dict__[name] = 42
 
-            def func(): pass
+            def func():
+                pass
             func.__code__ = f_code
             return func
 
-        elif(key == 'code'):
+        if key == 'code':
             return types.CodeType(
                 deserialize(value["co_argcount"]),
                 deserialize(value["co_posonlyargcount"]),
@@ -147,15 +141,17 @@ def deserialize(item: dict[str, any]):
                 deserialize(value["co_cellvars"])
             )
 
-        elif(key == 'object'):
+        if key == 'object':
             obj_type = deserialize(value['obj_type'])
             obj_dict = deserialize(value['obj_dict'])
 
             try:
                 obj = object.__new__(obj_type)
                 obj.__dict__ = obj_dict
-                for (key, value) in obj_dict.items():
-                    setattr(obj, key, value)
+                for (obj_key, obj_value) in obj_dict.items():
+                    setattr(obj, obj_key, obj_value)
             except TypeError:
                 obj = None
             return obj
+
+    return None
