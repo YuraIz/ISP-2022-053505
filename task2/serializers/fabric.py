@@ -37,9 +37,18 @@ class JsonSerializerFabric(SerializerFabric):
 
 
 class YamlSerializerFabric(SerializerFabric):
-    """Fabric that can create xml serializer."""
+    """Fabric that can create yaml serializer."""
 
     @staticmethod
     def create_serializer() -> serializers.Serializer:
         """Create yaml serializer."""
         return serializers.YamlSerializer()
+
+
+class TomlSerializerFabric(SerializerFabric):
+    """Fabric that can create toml serializer."""
+
+    @staticmethod
+    def create_serializer() -> serializers.Serializer:
+        """Create toml serializer."""
+        return serializers.TomlSerializer()

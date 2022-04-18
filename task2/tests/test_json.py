@@ -1,27 +1,32 @@
+"""Tests for JsonSerializer."""
 from types import MappingProxyType
 from serializers.json_serializer import JsonSerializer
 
 
-def mul(a, b):
-    return a * b
+def mul(first, second):
+    """Function to check."""
+    return first * second
 
 
 def test_loads():
+    """Dumps and loads works without exeptions."""
     serializer = JsonSerializer()
-    s = serializer.dumps(serializer)
-    serializer = serializer.loads(s)
+    serialized = serializer.dumps(serializer)
+    serializer = serializer.loads(serialized)
 
 
 def test_fun():
+    """Function dumps and loads correct."""
     serializer = JsonSerializer()
-    s = serializer.dumps(mul)
-    res = serializer.loads(s)
+    serialized = serializer.dumps(mul)
+    res = serializer.loads(serialized)
     assert res(6, 8) == 8*6
 
 
 def test_mpt():
+    """Serializer can work with MappingProxyType."""
     serializer = JsonSerializer()
     item = {'key': 8, 'second_key': 9}
     mpt = MappingProxyType(item)
-    s = serializer.dumps(mpt)
-    res = serializer.loads(s)
+    serialized = serializer.dumps(mpt)
+    serializer.loads(serialized)

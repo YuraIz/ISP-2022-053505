@@ -4,9 +4,15 @@
 import code
 import sys
 import importlib
-from serializers.fabric import (SerializerFabric, XmlSerializerFabric,
-                                JsonSerializerFabric, YamlSerializerFabric)
-from pr_modules.args import ArgParcer
+from cereal_modules.args import ArgParcer
+from serializers.fabric import (
+    SerializerFabric,
+    XmlSerializerFabric,
+    JsonSerializerFabric,
+    YamlSerializerFabric,
+    TomlSerializerFabric
+)
+
 
 items_to_dump, items_to_load, items_to_convert = ArgParcer.get_args()
 
@@ -17,7 +23,8 @@ def get_fabric(filename: str) -> SerializerFabric | None:
     fabrics = {
         'json': JsonSerializerFabric,
         'yaml': YamlSerializerFabric,
-        'xml': XmlSerializerFabric
+        'xml': XmlSerializerFabric,
+        'toml': TomlSerializerFabric
     }
     return fabrics.get(filetype, None)
 

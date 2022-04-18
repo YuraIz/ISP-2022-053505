@@ -1,17 +1,13 @@
 #!/usr/bin/python
 """How to use serializers."""
 
-
-# TODO:
-# [+] core
-# [+] json
-# [+] xml
-# [+] yaml
-# [ ] toml
-# [ ] tests
-
-from serializers.fabric import (SerializerFabric, XmlSerializerFabric,
-                                JsonSerializerFabric, YamlSerializerFabric)
+from serializers.fabric import (
+    SerializerFabric,
+    TomlSerializerFabric,
+    XmlSerializerFabric,
+    JsonSerializerFabric,
+    YamlSerializerFabric
+)
 
 import serializers.serializer_core as core
 
@@ -43,12 +39,14 @@ def some_thing(fabric: SerializerFabric):
     serializer = fabric.create_serializer()
     person = Person('tyler', 21)
     string = serializer.dumps(person)
+#    print(string)
     res = serializer.loads(string)
     res.greet()
 
-    print(isinstance(res, Person))
+    #print(isinstance(res, Person))
 
 
 some_thing(XmlSerializerFabric)
 some_thing(JsonSerializerFabric)
 some_thing(YamlSerializerFabric)
+some_thing(TomlSerializerFabric)
