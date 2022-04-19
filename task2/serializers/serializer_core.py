@@ -107,14 +107,6 @@ def deserialize(item: dict[str, any]) -> any:
         if key == 'func':
 
             f_code = deserialize(value)
-            f_names = f_code.co_names
-
-            for name in f_names:
-                if builtins.__dict__.get(name, 42) == 42:
-                    try:
-                        builtins.__dict__[name] = importlib.import_module(name)
-                    except ModuleNotFoundError:
-                        builtins.__dict__[name] = 42
 
             def func():
                 pass
@@ -122,6 +114,15 @@ def deserialize(item: dict[str, any]) -> any:
             return func
 
         if key == 'code':
+            code_names = deserialize(value["co_names"])
+
+            for name in code_names:
+                if builtins.__dict__.get(name, 42) == 42:
+                    try:
+                        builtins.__dict__[name] = importlib.import_module(name)
+                    except ModuleNotFoundError:
+                        builtins.__dict__[name] = 42
+
             return types.CodeType(
                 deserialize(value["co_argcount"]),
                 deserialize(value["co_posonlyargcount"]),
@@ -131,7 +132,7 @@ def deserialize(item: dict[str, any]) -> any:
                 deserialize(value["co_flags"]),
                 deserialize(value["co_code"]),
                 deserialize(value["co_consts"]),
-                deserialize(value["co_names"]),
+                code_names,
                 deserialize(value["co_varnames"]),
                 "deserialized",  # deserialize(value["co_filename"])),
                 deserialize(value["co_name"]),
